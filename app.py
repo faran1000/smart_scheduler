@@ -59,10 +59,11 @@ def init_db():
 
 init_db()
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     if "user_id" not in session:
-        session["user_id"] = 1
+        return redirect(url_for("login"))
+
 
     conn = get_db_connection()
     cursor = conn.cursor()
