@@ -12,22 +12,34 @@ def get_db_connection():
      return conn
 
 def init_db():
-     conn = get_db_connection()
-     conn.execute('''
-               CREATE TABLE IF NOT EXISTS tasks (
-                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                 task TEXT,
-                 description TEXT,
-                 category TEXT,
-                 priority TEXT,
-                 deadline TEXT,
-                 status TEXT DEFAULT 'در انتظار'
-             )
-         ''')
-     conn.commit()
-     conn.close()
+    conn = get_db_connection()
+    # ساخت جدول tasks
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            task TEXT,
+            description TEXT,
+            category TEXT,
+            priority TEXT,
+            deadline TEXT,
+            status TEXT DEFAULT 'در انتظار'
+        )
+    ''')
+    
+    # ساخت جدول users (این بخش را اضافه کن)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
 
-     init_db()
+init_db()
+
 
 
 
