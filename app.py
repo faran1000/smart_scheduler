@@ -3,17 +3,19 @@ import sqlite3
 from datetime import datetime
 import jdatetime
 import os
+
 app = Flask(__name__)
-app.secret_key = "GAPGPTMASKTOKEN69rbztv0ezX0X"
+app.secret_key = "GAPGPTMASKTOKENqmbf34yq1oX0X"
 
 def get_db_connection():
-     conn = sqlite3.connect('smart_scheduler.db')
-     conn.row_factory = sqlite3.Row
-     return conn
+    conn = sqlite3.connect('smart_scheduler.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
+    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,28 +23,42 @@ def init_db():
             password_hash TEXT NOT NULL
         )
     ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+        )
+    ''')
+    
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             title TEXT NOT NULL,
             description TEXT,
-            category TEXT,
+            category_id INTEGER,
             priority TEXT,
-            deadline TEXT,
-            status TEXT,
-            FOREIGN KEY (user_id) REFERENCES users (id)
+            due_date TEXT,
+            status TEXT DEFAULT 'انجام نشده',
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (category_id) REFERENCES categories (id)
         )
     ''')
+
+    # ایجاد کاربر و دسته‌بندی‌های پیش‌فرض در صورت عدم وجود
+    cursor.execute("SELECT id FROM users WHERE id = 1")
+    if not cursor.fetchone():
+        cursor.execute("INSERT INTO users (id, username, password_hash) VALUES (1, 'کاربر', '123456')")
+
+    cursor.execute("SELECT COUNT(*) FROM categories")
+    if cursor.fetchone()[0] == 0:
+        cursor.executemany("INSERT INTO categories (name) VALUES (?)", [('عمومی',), ('کاری',), ('شخصی',), ('درسی',)])
+
     conn.commit()
     conn.close()
 
 init_db()
-  
-
-
-
-
 
 @app.route("/")
 def index():
@@ -59,8 +75,7 @@ def index():
 
         cursor.execute("""
             SELECT t.id, t.title, t.description, t.priority, 
-            t.due_date, 
-            t.status, c.name AS category_name 
+                   t.due_date, t.status, c.name AS category_name 
             FROM tasks t
             LEFT JOIN categories c ON t.category_id = c.id
             WHERE t.user_id = ? 
@@ -72,20 +87,20 @@ def index():
         for row in raw_tasks:
             shamsi_due = ""
             if row[4]:
-                dt_val = row[4]
+                dt_val = str(row[4]).split('.')[0].strip()
                 try:
-                    if isinstance(dt_val, str):
-                        if '.' in dt_val:
-                            dt_val = dt_val.split('.')[0]
+                    dt = None
+                    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
                         try:
-                            dt = datetime.strptime(dt_val, '%Y-%m-%d %H:%M:%S')
+                            dt = datetime.strptime(dt_val, fmt)
+                            break
                         except ValueError:
-                            dt = datetime.strptime(dt_val, '%Y-%m-%d %H:%M')
+                            pass
+                    if dt:
+                        shamsi_dt = jdatetime.datetime.fromgregorian(datetime=dt)
+                        shamsi_due = shamsi_dt.strftime("%Y/%m/%d %H:%M")
                     else:
-                        dt = dt_val
-                    
-                    shamsi_dt = jdatetime.datetime.fromgregorian(datetime=dt)
-                    shamsi_due = shamsi_dt.strftime("%Y/%m/%d %H:%M")
+                        shamsi_due = dt_val
                 except Exception:
                     shamsi_due = str(row[4])
 
@@ -104,7 +119,6 @@ def index():
         cursor.close()
         conn.close()
 
-
 @app.route("/add_task", methods=["GET", "POST"])
 def add_task():
     if request.method == "GET":
@@ -113,28 +127,23 @@ def add_task():
     if "user_id" not in session:
         session["user_id"] = 1
 
-    title = request.form.get("title", "").strip()
-    desc = request.form.get("desc", "").strip() or None
-    priority = request.form.get("priority", "متوسط")
-    cat_id = request.form.get("cat_id") or None
-    
-    # دریافت مقدار تاریخ ارسالی از تقویم
-    due_raw = request.form.get("due", "").strip()
-    print("due_raw =", repr(due_raw))
+    title = GAPGPTMASKTOKENqmbf34yq1oX1X"title", "").strip()
+    desc = GAPGPTMASKTOKENqmbf34yq1oX2X"desc", "").strip() or None
+    priority = GAPGPTMASKTOKENqmbf34yq1oX3X"priority", "متوسط")
+    cat_id = GAPGPTMASKTOKENqmbf34yq1oX4X"cat_id") or None
 
+    due_raw = GAPGPTMASKTOKENqmbf34yq1oX5X"due", "").strip()
     due_date = None
 
     if due_raw:
-        # حذف T یا میلی‌ثانیه احتمالی
         cleaned = due_raw.replace("T", " ").split(".")[0].strip()
         for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
             try:
-                due_date = datetime.strptime(cleaned, fmt)
+                due_date = datetime.strptime(cleaned, fmt).strftime("%Y-%m-%d %H:%M:%S")
                 break
             except ValueError:
                 pass
 
-        # اگر تاریخ به صورت متن شمسی فرستاده شده بود (مثلا 1403/07/04 15:30)
         if not due_date and "/" in cleaned:
             try:
                 parts = cleaned.split(" ")
@@ -145,7 +154,7 @@ def add_task():
                     time_p = parts[1].split(":")
                     hour, minute = int(time_p[0]), int(time_p[1])
                 g_date = jdatetime.datetime(jy, jm, jd, hour, minute).togregorian()
-                due_date = g_date
+                due_date = g_date.strftime("%Y-%m-%d %H:%M:%S")
             except Exception:
                 due_date = None
 
@@ -153,12 +162,11 @@ def add_task():
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO tasks (title, description, category_id, priority, due_date, user_id, status)
-        VALUES (?, ?, ?, ?, ?, ?, N'انجام نشده')
+        VALUES (?, ?, ?, ?, ?, ?, 'انجام نشده')
     """, (title, desc, cat_id, priority, due_date, session["user_id"]))
     conn.commit()
     conn.close()
     return redirect(url_for("index"))
-
 
 @app.route("/update_status/<int:task_id>/<status>")
 def update_status(task_id, status):
@@ -196,21 +204,19 @@ def reports():
     cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ?", (user_id,))
     total_tasks = cursor.fetchone()[0] or 0
 
-    cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = N'انجام شده'", (user_id,))
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = 'انجام شده'", (user_id,))
     done_tasks = cursor.fetchone()[0] or 0
 
-    cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = N'در حال انجام'", (user_id,))
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = 'در حال انجام'", (user_id,))
     in_progress_tasks = cursor.fetchone()[0] or 0
 
-    cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND (status = N'انجام نشده' OR status IS NULL)", (user_id,))
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND (status = 'انجام نشده' OR status IS NULL)", (user_id,))
     pending_tasks = cursor.fetchone()[0] or 0
 
     completion_rate = int((done_tasks / total_tasks * 100)) if total_tasks > 0 else 0
 
     cursor.execute("""
-        SELECT id, title, priority, 
-               CONVERT(VARCHAR(16), due_date, 120) AS due_date, 
-               status 
+        SELECT id, title, priority, due_date, status 
         FROM tasks 
         WHERE user_id = ?
         ORDER BY id DESC
@@ -242,9 +248,7 @@ def api_tasks():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, title, 
-               CONVERT(VARCHAR(19), due_date, 120) AS due_date, 
-               status, priority 
+        SELECT id, title, due_date, status, priority 
         FROM tasks 
         WHERE user_id = ? AND due_date IS NOT NULL
     """, (session["user_id"],))
@@ -264,8 +268,8 @@ def api_tasks():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = GAPGPTMASKTOKENqmbf34yq1oX6X'username')
+        password = GAPGPTMASKTOKENqmbf34yq1oX7X'password')
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
@@ -281,8 +285,8 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = GAPGPTMASKTOKENqmbf34yq1oX8X'username')
+        password = GAPGPTMASKTOKENqmbf34yq1oX9X'password')
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM users WHERE username = ? AND password_hash = ?", (username, password))
