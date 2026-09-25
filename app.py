@@ -24,8 +24,8 @@ def init_db():
                  status TEXT DEFAULT 'در انتظار'
              )
          ''')
-         conn.commit()
-         conn.close()
+     conn.commit()
+     conn.close()
 
      init_db()
 
