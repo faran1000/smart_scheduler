@@ -14,25 +14,23 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("DROP TABLE IF EXISTS tasks")
-    cursor.execute("DROP TABLE IF EXISTS categories")
-    cursor.execute("DROP TABLE IF EXISTS users")
+    # ساخت جدول‌ها فقط اگر وجود ندارند
     cursor.execute("""
-        CREATE TABLE users (
+        CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
             password TEXT
         )
     """)
     cursor.execute("""
-        CREATE TABLE categories (
+        CREATE TABLE IF NOT EXISTS categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             user_id INTEGER
         )
     """)
     cursor.execute("""
-        CREATE TABLE tasks (
+        CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             title TEXT,
@@ -48,6 +46,11 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+
+# این خط حیاتی است: مطمئن شو در app.py این تابع در شروع برنامه صدا زده می‌شود
+if __name__ == '__main__':
+    init_db()
+    app.run()
 
 
 
