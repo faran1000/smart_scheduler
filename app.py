@@ -13,7 +13,7 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-    # ساخت جدول tasks
+    # جدول tasks
     conn.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +26,7 @@ def init_db():
         )
     ''')
     
-    # ساخت جدول users (این بخش را اضافه کن)
+    # جدول users
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,11 +34,20 @@ def init_db():
             password TEXT NOT NULL
         )
     ''')
+
+    # جدول categories (این بخش را اضافه کن)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL
+        )
+    ''')
     
     conn.commit()
     conn.close()
 
 init_db()
+
 
 
 
