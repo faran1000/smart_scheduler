@@ -6,15 +6,15 @@ import jdatetime
 app = Flask(__name__)
 app.secret_key = "GAPGPTMASKTOKEN69rbztv0ezX0X"
 
-     def get_db_connection():
-         conn = sqlite3.connect('smart_scheduler.db')
-         conn.row_factory = sqlite3.Row
-         return conn
+def get_db_connection():
+     conn = sqlite3.connect('smart_scheduler.db')
+     conn.row_factory = sqlite3.Row
+     return conn
 
-     def init_db():
-         conn = get_db_connection()
-         conn.execute('''
-             CREATE TABLE IF NOT EXISTS tasks (
+def init_db():
+     conn = get_db_connection()
+     conn.execute('''
+               CREATE TABLE IF NOT EXISTS tasks (
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  task TEXT,
                  description TEXT,
