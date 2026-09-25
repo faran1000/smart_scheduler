@@ -1,14 +1,34 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-import pyodbc
+import sqlite3
 from datetime import datetime
 import jdatetime
 
 app = Flask(__name__)
 app.secret_key = "GAPGPTMASKTOKEN69rbztv0ezX0X"
 
-def get_db():
-    conn = pyodbc.connect('DRIVER={SQL Server};SERVER=.\\SQLEXPRESS;DATABASE=smart_scheduler;Trusted_Connection=yes;')
-    return conn
+     def get_db_connection():
+         conn = sqlite3.connect('smart_scheduler.db')
+         conn.row_factory = sqlite3.Row
+         return conn
+
+     def init_db():
+         conn = get_db_connection()
+         conn.execute('''
+             CREATE TABLE IF NOT EXISTS tasks (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 task TEXT,
+                 description TEXT,
+                 category TEXT,
+                 priority TEXT,
+                 deadline TEXT,
+                 status TEXT DEFAULT 'در انتظار'
+             )
+         ''')
+         conn.commit()
+         conn.close()
+
+     init_db()
+
 
 
 @app.route("/")
