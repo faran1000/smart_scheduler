@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>گزارش وضعیت وظایف</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .nav-links a { text-decoration: none; background: #007bff; color: white; padding: 8px 15px; border-radius: 5px; font-size: 14px; margin-right: 5px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { padding: 15px; border-radius: 8px; text-align: center; color: white; font-weight: bold; }
+        .bg-total { background-color: #6c757d; }
+        .bg-done { background-color: #28a745; }
+        .bg-progress { background-color: #ffc107; color: #333 !important; }
+        .bg-pending { background-color: #dc3545; }
+        .stat-card h3 { margin: 0 0 10px 0; font-size: 16px; }
+        .stat-card p { margin: 0; font-size: 24px; }
+        .progress-box { background: #e9ecef; border-radius: 8px; overflow: hidden; margin-bottom: 25px; height: 25px; position: relative; }
+        .progress-bar { background: #28a745; height: 100%; text-align: center; color: white; line-height: 25px; font-size: 13px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; }
+        th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>گزارش جامع وضعیت وظایف</h2>
+            <div class="nav-links">
+                <a href="/">صفحه اصلی</a>
+                <a href="/calendar">تقویم وظایف</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card bg-total">
+                <h3>کل وظایف</h3>
+                <p>{{ summary.total }}</p>
+            </div>
+            <div class="stat-card bg-done">
+                <h3>انجام شده</h3>
+                <p>{{ summary.done }}</p>
+            </div>
+            <div class="stat-card bg-progress">
+                <h3>در حال انجام</h3>
+                <p>{{ summary.in_progress }}</p>
+            </div>
+            <div class="stat-card bg-pending">
+                <h3>انجام نشده</h3>
+                <p>{{ summary.pending }}</p>
+            </div>
+        </div>
+
+        <h4>درصد پیشرفت کل: {{ summary.rate }}%</h4>
+        <div class="progress-box">
+            <div class="progress-bar" style="width: {{ summary.rate }}%;">{{ summary.rate }}%</div>
+        </div>
+
+        <h3>لیست جزئیات وظایف</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>کد</th>
+                    <th>عنوان</th>
+                    <th>اولویت</th>
+                    <th>موعد و ساعت</th>
+                    <th>وضعیت</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tasks %}
+                <tr>
+                    <td>{{ t[0] }}</td>
+                    <td>{{ t[1] }}</td>
+                    <td>{{ t[2] }}</td>
+                    <td>{{ t[3] if t[3] else '-' }}</td>
+                    <td>{{ t[4] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">هیچ وظیفه‌ای ثبت نشده است.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مدیریت هوشمند وظایف</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .account-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 15px; background: #f2f6f9; border-radius: 6px; }
+        .account-bar a { color: #1769aa; text-decoration: none; margin-right: 12px; }
+        .account-bar .logout { color: #dc3545; }
+        form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; border: 1px solid #eee; border-radius: 5px; background: #fff; }
+        form input, form select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-submit { grid-column: span 3; background: #28a745; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .btn { padding: 5px 8px; text-decoration: none; border-radius: 3px; font-size: 12px; }
+        .btn-done { background: #28a745; color: white; }
+        .btn-progress { background: #ffc107; color: black; }
+        .btn-delete { background: #dc3545; color: white; }
+        .datepicker-plot-area { font-family: Tahoma, Arial, sans-serif !important; z-index: 999999 !important; }
+        @media (max-width: 700px) {
+            .account-bar { align-items: flex-start; flex-direction: column; }
+            form { grid-template-columns: 1fr; }
+            .btn-submit { grid-column: span 1; }
+            table { font-size: 12px; }
+            th, td { padding: 7px 4px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="account-bar">
+        <div>خوش آمدید، <strong>{{ username }}</strong></div>
+        <div>
+            <a href="/reports">مشاهده گزارش</a>
+            <a href="/calendar">مشاهده تقویم</a>
+            <a href="/logout" class="logout">خروج</a>
+        </div>
+    </div>
+
+    <h1>مدیریت هوشمند وظایف</h1>
+
+    <form action="/add_task" method="POST">
+        <input type="text" name="title" placeholder="عنوان وظیفه" required>
+        <input type="text" name="desc" placeholder="توضیحات">
+        <select name="cat_id">
+            <option value="">بدون دسته بندی</option>
+            {% for cat in categories %}
+                <option value="{{ cat[0] }}">{{ cat[1] }}</option>
+            {% endfor %}
+        </select>
+        
+        <select name="priority">
+            <option>کم</option>
+            <option selected>متوسط</option>
+            <option>زیاد</option>
+        </select>
+        
+        <input type="text" name="due" id="shamsi_due_date" placeholder="انتخاب تاریخ و ساعت موعد" required autocomplete="off" style="cursor: pointer; background: #fff;">
+        <input type="hidden" name="due" id="gregorian_due_date">
+
+        <button type="submit" class="btn-submit">ثبت وظیفه جدید</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>عنوان</th>
+                <th>توضیحات</th>
+                <th>دسته</th>
+                <th>اولویت</th>
+                <th>موعد</th>
+                <th>وضعیت</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in tasks %}
+            <tr>
+                <td>{{ t[1] }}</td>
+                <td>{{ t[2] }}</td>
+                <td>{{ t[6] if t[6] else 'بدون دسته‌بندی' }}</td>
+                <td>{{ t[3] }}</td>
+                <td>{{ t[4] }}</td>
+                <td>{{ t[5] }}</td>
+                <td>
+                    <a href="/update_status/{{ t[0] }}/انجام شده" class="btn btn-done">انجام شد</a>
+                    <a href="/update_status/{{ t[0] }}/در حال انجام" class="btn btn-progress">در حال انجام</a>
+                    <a href="/delete_task/{{ t[0] }}" class="btn btn-delete">حذف</a>
+
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </table>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $("#shamsi_due_date").persianDatepicker({
+            format: 'YYYY/MM/DD HH:mm',
+            altField: '#gregorian_due_date',
+            altFormat: 'YYYY-MM-DD HH:mm:ss',
+            initialValue: false,
+            autoClose: false,
+            timePicker: {
+                enabled: true,
+                meridiem: { enabled: false },
+                second: { enabled: false }
+            }
+        });
+    });
+
+    setInterval(function() {
+        fetch('/check_alerts')
+            .then(response => response.json())
+            .then(data => {
+                if (data.alerts && data.alerts.length > 0) {
+                    alert("هشدار: وظایف زیر در ۱۰ دقیقه آینده موعدشان است: \n" + data.alerts.join(", "));
+                }
+            })
+            .catch(() => {});
+    }, 30000);
+</script>
+</body>
+</html>

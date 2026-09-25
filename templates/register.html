@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ثبت‌نام | سیستم هوشمند وظایف</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); width: 100%; max-width: 360px; }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 25px; font-size: 20px; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-size: 13px; color: #444; }
+        input { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 11px; background: #27ae60; color: #fff; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #219150; }
+        .msg { background: #fee; color: #c0392b; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; text-align: center; }
+        .links { text-align: center; margin-top: 18px; font-size: 13px; }
+        .links a { color: #2980b9; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>ثبت‌نام کاربر جدید</h2>
+        {% if error %}
+            <div class="msg">{{ error }}</div>
+        {% endif %}
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label>نام مستعار:</label>
+                <input type="text" name="username" required placeholder="مثال: maryam">
+            </div>
+            <div class="form-group">
+                <label>رمز عبور:</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit">ایجاد حساب</button>
+        </form>
+        <div class="links">
+            قبلاً حساب دارید؟ <a href="/login">ورود</a>
+        </div>
+    </div>
+</body>
+</html>
