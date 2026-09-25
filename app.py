@@ -47,10 +47,8 @@ def init_db():
     conn.commit()
     conn.close()
 
-# این خط حیاتی است: مطمئن شو در app.py این تابع در شروع برنامه صدا زده می‌شود
-if __name__ == '__main__':
     init_db()
-    app.run()
+  
 
 
 
