@@ -13,27 +13,26 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-    
-    # جدول users
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS users (
+    cursor = conn.cursor()
+    cursor.execute("DROP TABLE IF EXISTS tasks")
+    cursor.execute("DROP TABLE IF EXISTS categories")
+    cursor.execute("DROP TABLE IF EXISTS users")
+    cursor.execute("""
+        CREATE TABLE users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
+            username TEXT UNIQUE,
+            password TEXT
         )
-    ''')
-
-    # جدول categories
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS categories (
+    """)
+    cursor.execute("""
+        CREATE TABLE categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL
+            name TEXT,
+            user_id INTEGER
         )
-    ''')
-
-    # جدول tasks کامل با تمام ستون‌های مورد نیاز
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS tasks (
+    """)
+    cursor.execute("""
+        CREATE TABLE tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             title TEXT,
@@ -42,15 +41,13 @@ def init_db():
             category_id INTEGER,
             category TEXT,
             priority TEXT,
+            due_date TEXT,
             deadline TEXT,
-            status TEXT DEFAULT 'در انتظار'
+            status TEXT
         )
-    ''')
-    
+    """)
     conn.commit()
     conn.close()
-
-init_db()
 
 
 
