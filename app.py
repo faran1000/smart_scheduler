@@ -36,7 +36,7 @@ def index():
     if "user_id" not in session:
         session["user_id"] = 1
 
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
@@ -136,7 +136,7 @@ def add_task():
             except Exception:
                 due_date = None
 
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO tasks (title, description, category_id, priority, due_date, user_id, status)
@@ -152,7 +152,7 @@ def update_status(task_id, status):
     if "user_id" not in session:
         session["user_id"] = 1
 
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("UPDATE tasks SET status = ? WHERE id = ? AND user_id = ?", (status, task_id, session["user_id"]))
     conn.commit()
@@ -164,7 +164,7 @@ def delete_task(task_id):
     if "user_id" not in session:
         session["user_id"] = 1
 
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM tasks WHERE id = ? AND user_id = ?", (task_id, session["user_id"]))
     conn.commit()
@@ -177,7 +177,7 @@ def reports():
         session["user_id"] = 1
 
     user_id = session["user_id"]
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ?", (user_id,))
@@ -226,7 +226,7 @@ def api_tasks():
     if "user_id" not in session:
         session["user_id"] = 1
 
-    conn = get_db()
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT id, title, 
@@ -253,7 +253,7 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        conn = get_db()
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
         if cursor.fetchone():
@@ -270,7 +270,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        conn = get_db()
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM users WHERE username = ? AND password_hash = ?", (username, password))
         user = cursor.fetchone()
