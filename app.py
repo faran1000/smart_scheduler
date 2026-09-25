@@ -5,7 +5,7 @@ import jdatetime
 import os
 
 app = Flask(__name__)
-app.secret_key = "GAPGPTMASKTOKENqmbf34yq1oX0X"
+app.secret_key = "smart_scheduler_secret_key_2026"
 
 def get_db_connection():
     conn = sqlite3.connect('smart_scheduler.db')
@@ -46,7 +46,6 @@ def init_db():
         )
     ''')
 
-    # ایجاد کاربر و دسته‌بندی‌های پیش‌فرض در صورت عدم وجود
     cursor.execute("SELECT id FROM users WHERE id = 1")
     if not cursor.fetchone():
         cursor.execute("INSERT INTO users (id, username, password_hash) VALUES (1, 'کاربر', '123456')")
@@ -127,12 +126,12 @@ def add_task():
     if "user_id" not in session:
         session["user_id"] = 1
 
-    title = GAPGPTMASKTOKENqmbf34yq1oX1X"title", "").strip()
-    desc = GAPGPTMASKTOKENqmbf34yq1oX2X"desc", "").strip() or None
-    priority = GAPGPTMASKTOKENqmbf34yq1oX3X"priority", "متوسط")
-    cat_id = GAPGPTMASKTOKENqmbf34yq1oX4X"cat_id") or None
+    title = request.form.get("title", "").strip()
+    desc = request.form.get("desc", "").strip() or None
+    priority = request.form.get("priority", "متوسط")
+    cat_id = request.form.get("cat_id") or None
 
-    due_raw = GAPGPTMASKTOKENqmbf34yq1oX5X"due", "").strip()
+    due_raw = request.form.get("due", "").strip()
     due_date = None
 
     if due_raw:
@@ -268,8 +267,8 @@ def api_tasks():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = GAPGPTMASKTOKENqmbf34yq1oX6X'username')
-        password = GAPGPTMASKTOKENqmbf34yq1oX7X'password')
+        username = request.form.get('username')
+        password = request.form.get('password')
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
@@ -285,8 +284,8 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = GAPGPTMASKTOKENqmbf34yq1oX8X'username')
-        password = GAPGPTMASKTOKENqmbf34yq1oX9X'password')
+        username = request.form.get('username')
+        password = request.form.get('password')
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM users WHERE username = ? AND password_hash = ?", (username, password))
